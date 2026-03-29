@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Walar Command Center</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="walar_icon.png">
+  <style>
+    :root {
+      --glass-bg: rgba(255,255,255,0.07);
+      --glass-border: rgba(255,255,255,0.14);
+      --glass-highlight: rgba(255,255,255,0.22);
+      --accent: #3ecfff;
+      --accent2: #a78bfa;
+      --accent3: #34d399;
+      --accent4: rgba(255,170,50,0.95);
+      --accent5: rgba(251,113,133,0.95);
+      --text-primary: rgba(255,255,255,0.95);
+      --text-secondary: rgba(255,255,255,0.55);
+      --text-muted: rgba(255,255,255,0.3);
+      --bg-deep: #050810;
+      --radius-xl: 36px;
+      --font-main: 'Space Grotesk', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:var(--font-main); background:var(--bg-deep); color:var(--text-primary); min-height:100vh; overflow-x:hidden; }
+    .bg-canvas { position:fixed; inset:0; z-index:0; overflow:hidden; }
+    .bg-canvas::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(62,207,255,0.12) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 80%, rgba(167,139,250,0.10) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 50% 50%, rgba(52,211,153,0.05) 0%, transparent 70%); }
+    .bg-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px, transparent 1px); background-size:60px 60px; }
+    .orb { position:absolute; border-radius:50%; filter:blur(80px); animation:drift 20s ease-in-out infinite; }
+    .orb-1 { width:500px;height:500px;background:radial-gradient(circle,rgba(62,207,255,0.15),transparent);top:-100px;left:-100px; }
+    .orb-2 { width:400px;height:400px;background:radial-gradient(circle,rgba(167,139,250,0.12),transparent);bottom:-80px;right:-80px;animation-delay:-7s; }
+    .orb-3 { width:300px;height:300px;background:radial-gradient(circle,rgba(52,211,153,0.10),transparent);top:50%;left:60%;animation-delay:-14s; }
+    @keyframes drift { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(40px,-30px) scale(1.05);} 66%{transform:translate(-20px,40px) scale(0.95);} }
+
+    nav { position:fixed;top:0;left:0;right:0;z-index:100;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,8,16,0.75);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--glass-border); }
+    .nav-logo { display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:0.04em; }
+    .nav-logo-icon { width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-family:var(--font-mono);font-weight:700;color:#000; }
+    .nav-label { font-family:var(--font-mono);font-size:11px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;padding:3px 8px;border:1px solid rgba(62,207,255,0.3);border-radius:4px;background:rgba(62,207,255,0.05); }
+    .nav-right { display:flex;align-items:center;gap:12px; }
+    .nav-status { display:flex;align-items:center;gap:6px;font-size:12px;font-family:var(--font-mono);color:var(--text-secondary); }
+    .status-dot { width:7px;height:7px;border-radius:50%;background:var(--accent3);box-shadow:0 0 8px var(--accent3);animation:pulse-dot 2s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+    .online-pill { display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:20px;font-family:var(--font-mono);font-size:11px;color:var(--accent3);cursor:pointer;transition:all 0.2s;position:relative; }
+    .online-pill:hover { background:rgba(52,211,153,0.12); }
+    .online-pill-dot { width:6px;height:6px;border-radius:50%;background:var(--accent3);box-shadow:0 0 6px var(--accent3);animation:pulse-dot 2s ease-in-out infinite; }
+    .online-dropdown { display:none;position:absolute;top:calc(100% + 8px);right:0;background:rgba(8,12,28,0.97);backdrop-filter:blur(40px);border:1px solid var(--glass-border);border-radius:14px;padding:12px;min-width:180px;box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:200; }
+    .online-pill.open .online-dropdown { display:block; }
+    .online-dropdown-title { font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);padding-bottom:8px;border-bottom:1px solid var(--glass-border);margin-bottom:8px; }
+    .online-member { display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:12px;color:var(--text-secondary); }
+    .online-member-dot { width:6px;height:6px;border-radius:50%;background:var(--accent3);box-shadow:0 0 6px var(--accent3);flex-shrink:0; }
+
+    .mail-nav-btn { position:relative;width:36px;height:36px;border-radius:10px;background:var(--glass-bg);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;text-decoration:none;font-size:16px; }
+    .mail-nav-btn:hover { background:rgba(255,255,255,0.12);border-color:var(--glass-highlight); }
+    .mail-unread-badge { position:absolute;top:-5px;right:-5px;background:var(--accent);color:#000;font-family:var(--font-mono);font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:none;align-items:center;justify-content:center;border:2px solid var(--bg-deep); }
+    .mail-unread-badge.visible { display:flex; }
+
+    .apps-trigger { width:36px;height:36px;border-radius:10px;background:var(--glass-bg);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative; }
+    .apps-trigger:hover { background:rgba(255,255,255,0.12);border-color:var(--glass-highlight); }
+    .apps-trigger-grid { display:grid;grid-template-columns:repeat(3,4px);gap:2px; }
+    .apps-trigger-dot { width:4px;height:4px;border-radius:1px;background:var(--text-secondary);transition:background 0.2s; }
+    .apps-trigger:hover .apps-trigger-dot { background:var(--text-primary); }
+    .apps-panel { display:none;position:absolute;top:calc(64px + 8px);right:32px;width:300px;background:rgba(8,12,28,0.97);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border:1px solid var(--glass-border);border-radius:20px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;z-index:200;animation:panelIn 0.2s ease; }
+    .apps-panel.open { display:block; }
+    @keyframes panelIn { from{opacity:0;transform:translateY(-8px) scale(0.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+    .apps-panel::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--glass-highlight),transparent);border-radius:20px 20px 0 0; }
+    .apps-panel-title { font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--glass-border); }
+    /* 6 services, 3x2 grid — no Language */
+    .apps-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px; }
+    .app-item { display:flex;flex-direction:column;align-items:center;padding:14px 8px;border-radius:14px;border:1px solid transparent;cursor:pointer;transition:all 0.2s;text-decoration:none;gap:8px;position:relative; }
+    .app-item:hover { background:var(--glass-bg);border-color:var(--glass-border); }
+    .app-item.soon { opacity:0.45;cursor:default;pointer-events:none; }
+    .app-icon { width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative; }
+    .app-icon::after { content:'';position:absolute;inset:0;border-radius:13px;background:inherit;filter:blur(12px);opacity:0.5;transform:scale(1.15);z-index:-1; }
+    .app-name { font-size:11px;font-weight:500;color:var(--text-secondary);text-align:center;letter-spacing:0.02em;line-height:1.2; }
+    .app-item:hover .app-name { color:var(--text-primary); }
+    .app-soon-badge { position:absolute;top:6px;right:6px;font-family:var(--font-mono);font-size:8px;padding:1px 5px;border-radius:4px;background:rgba(255,200,50,0.12);border:1px solid rgba(255,200,50,0.3);color:rgba(255,200,50,0.8);letter-spacing:0.05em; }
+    .apps-panel-footer { font-family:var(--font-mono);font-size:10px;color:var(--text-muted);text-align:center;padding-top:12px;border-top:1px solid var(--glass-border);letter-spacing:0.1em; }
+
+    .nav-user { display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:20px;font-size:13px;cursor:pointer;transition:all 0.2s;position:relative; }
+    .nav-user:hover { background:rgba(255,255,255,0.10); }
+    .nav-user-avatar { width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700; }
+    .nav-dropdown { display:none;position:absolute;top:calc(100% + 8px);right:0;background:rgba(10,14,30,0.97);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;padding:12px;min-width:160px;box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+    .nav-user.open .nav-dropdown { display:block; }
+    .dropdown-name { font-family:var(--font-mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;padding:4px 8px 10px;border-bottom:1px solid var(--glass-border);margin-bottom:8px; }
+    .dropdown-btn { width:100%;padding:8px 10px;background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.2);border-radius:8px;color:rgba(255,100,100,0.9);font-size:12px;font-family:var(--font-main);cursor:pointer;transition:all 0.2s;text-align:left;letter-spacing:0.05em; }
+    .dropdown-btn:hover { background:rgba(255,60,60,0.15); }
+
+    .hero { position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 40px 60px;text-align:center; }
+    .hero-eyebrow { font-family:var(--font-mono);font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;opacity:0;animation:fadeUp 0.8s ease forwards 0.2s;display:flex;align-items:center;gap:10px; }
+    .hero-eyebrow::before { content:'';width:40px;height:1px;background:linear-gradient(90deg,transparent,var(--accent)); }
+    .hero-eyebrow::after { content:'';width:40px;height:1px;background:linear-gradient(90deg,var(--accent),transparent); }
+    .hero-title { font-size:clamp(48px,7vw,88px);font-weight:700;line-height:1.05;letter-spacing:-0.03em;margin-bottom:20px;opacity:0;animation:fadeUp 0.9s ease forwards 0.35s; }
+    .hero-title .line-1 { display:block;color:var(--text-primary); }
+    .hero-title .line-2 { display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 50%,var(--accent3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+    .hero-sub { font-size:18px;color:var(--text-secondary);font-weight:300;max-width:500px;line-height:1.6;margin-bottom:48px;opacity:0;animation:fadeUp 0.9s ease forwards 0.5s; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+
+    /*
+      QUICK GRID — desktop 6 cols:
+      Row 1: Encrypt | Mail | Voice | Strategy | $WLR | [blank]
+      Row 2: Language | [blank] | [blank] | [blank] | Wallet | [blank]
+    */
+    .quick-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:12px;width:100%;max-width:1100px;margin-bottom:40px;opacity:0;animation:fadeUp 1s ease forwards 0.55s; }
+    .quick-card { background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:20px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;backdrop-filter:blur(20px); }
+    .quick-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--glass-highlight),transparent); }
+    .quick-card:hover { transform:translateY(-3px);box-shadow:0 20px 40px rgba(0,0,0,0.4); }
+    .quick-card.soon { opacity:0.5;cursor:default;pointer-events:none; }
+    .quick-card.blank { background:transparent;border-color:transparent;pointer-events:none;box-shadow:none !important;transform:none !important; }
+    .quick-card.blank::before { display:none; }
+    .quick-card-icon { font-size:26px; }
+    .quick-card-name { font-size:12px;font-weight:600;letter-spacing:0.03em; }
+    .quick-card-desc { font-size:10px;font-family:var(--font-mono);color:var(--text-muted);text-align:center;letter-spacing:0.05em; }
+    .quick-card-badge { font-family:var(--font-mono);font-size:9px;letter-spacing:0.08em;padding:2px 8px;border-radius:20px;margin-top:2px; }
+    .qc-1:hover { border-color:rgba(62,207,255,0.4);box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 30px rgba(62,207,255,0.08); } .qc-1 .quick-card-name { color:var(--accent); } .qc-1 .quick-card-badge { background:rgba(62,207,255,0.1);border:1px solid rgba(62,207,255,0.25);color:var(--accent); }
+    .qc-2:hover { border-color:rgba(167,139,250,0.4);box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 30px rgba(167,139,250,0.08); } .qc-2 .quick-card-name { color:var(--accent2); } .qc-2 .quick-card-badge { background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);color:var(--accent2); }
+    .qc-3:hover { border-color:rgba(255,170,50,0.4); } .qc-3 .quick-card-name { color:var(--accent4); } .qc-3 .quick-card-badge { background:rgba(255,170,50,0.1);border:1px solid rgba(255,170,50,0.25);color:var(--accent4); }
+    .qc-4:hover { border-color:rgba(52,211,153,0.4); } .qc-4 .quick-card-name { color:var(--accent3); } .qc-4 .quick-card-badge { background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);color:var(--accent3); }
+    .qc-5:hover { border-color:rgba(251,113,133,0.4); } .qc-5 .quick-card-name { color:var(--accent5); } .qc-5 .quick-card-badge { background:rgba(251,113,133,0.1);border:1px solid rgba(251,113,133,0.25);color:var(--accent5); }
+
+    .slideshow-wrapper { position:relative;z-index:1;width:100%;max-width:1100px;margin:0 auto;opacity:0;animation:fadeUp 1s ease forwards 0.75s; }
+    .slides-container { position:relative;border-radius:var(--radius-xl);overflow:hidden;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);box-shadow:0 0 0 1px rgba(255,255,255,0.05) inset,0 40px 120px rgba(0,0,0,0.6),0 0 60px rgba(62,207,255,0.04);aspect-ratio:16/7;min-height:360px; }
+    .slide { position:absolute;inset:0;display:flex;align-items:center;padding:60px 80px;opacity:0;transition:opacity 0.7s cubic-bezier(0.4,0,0.2,1),transform 0.7s cubic-bezier(0.4,0,0.2,1);transform:translateX(60px);pointer-events:none; }
+    .slide.active { opacity:1;transform:translateX(0);pointer-events:all; }
+    .slide.exit-left { opacity:0;transform:translateX(-60px);pointer-events:none; }
+    .slide-icon { flex-shrink:0;width:80px;height:80px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-right:60px;position:relative; }
+    .slide-icon::before { content:'';position:absolute;inset:0;border-radius:inherit;background:inherit;filter:blur(20px);opacity:0.5;transform:scale(1.2); }
+    .slide-content { flex:1; }
+    .slide-tag { font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px; }
+    .slide-tag-dot { width:5px;height:5px;border-radius:50%; }
+    .slide-title { font-size:clamp(26px,3.2vw,42px);font-weight:700;letter-spacing:-0.025em;line-height:1.1;margin-bottom:14px; }
+    .slide-desc { font-size:15px;color:var(--text-secondary);line-height:1.65;max-width:480px;margin-bottom:20px;font-weight:300; }
+    .slide-slogan { font-family:var(--font-mono);font-size:12px;letter-spacing:0.1em;margin-bottom:24px;opacity:0.6; }
+    .slide-cta { display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:600;letter-spacing:0.02em;cursor:pointer;transition:all 0.25s;text-decoration:none;border:none;font-family:var(--font-main); }
+    .slide-cta-primary { background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000; }
+    .slide-cta-primary:hover { transform:scale(1.04);box-shadow:0 8px 30px rgba(62,207,255,0.35); }
+    .slide-cta-ghost { background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text-primary); }
+    .slide-cta-ghost:hover { background:rgba(255,255,255,0.10);transform:scale(1.04); }
+    .slide-badge-soon { display:inline-flex;align-items:center;padding:6px 14px;border-radius:50px;font-size:12px;font-family:var(--font-mono);letter-spacing:0.1em;border:1px solid rgba(255,200,50,0.4);background:rgba(255,200,50,0.06);color:rgba(255,200,50,0.8);gap:6px; }
+    .slide-1 .slide-icon{background:linear-gradient(135deg,rgba(62,207,255,0.20),rgba(62,207,255,0.05));} .slide-1 .slide-tag,.slide-1 .slide-slogan{color:var(--accent);} .slide-1 .slide-tag-dot{background:var(--accent);} .slide-1 .slide-title{color:var(--accent);}
+    .slide-2 .slide-icon{background:linear-gradient(135deg,rgba(167,139,250,0.20),rgba(167,139,250,0.05));} .slide-2 .slide-tag,.slide-2 .slide-slogan{color:var(--accent2);} .slide-2 .slide-tag-dot{background:var(--accent2);} .slide-2 .slide-title{color:var(--accent2);}
+    .slide-3 .slide-icon{background:linear-gradient(135deg,rgba(255,170,50,0.20),rgba(255,170,50,0.05));} .slide-3 .slide-tag,.slide-3 .slide-slogan{color:rgba(255,170,50,0.90);} .slide-3 .slide-tag-dot{background:rgba(255,170,50,0.90);} .slide-3 .slide-title{color:rgba(255,170,50,0.95);}
+    .slide-4 .slide-icon{background:linear-gradient(135deg,rgba(52,211,153,0.20),rgba(52,211,153,0.05));} .slide-4 .slide-tag,.slide-4 .slide-slogan{color:var(--accent3);} .slide-4 .slide-tag-dot{background:var(--accent3);} .slide-4 .slide-title{color:var(--accent3);}
+    .slide-5 .slide-icon{background:linear-gradient(135deg,rgba(251,113,133,0.20),rgba(251,113,133,0.05));} .slide-5 .slide-tag,.slide-5 .slide-slogan{color:rgba(251,113,133,0.90);} .slide-5 .slide-tag-dot{background:rgba(251,113,133,0.90);} .slide-5 .slide-title{color:rgba(251,113,133,0.95);}
+    .slide-6 .slide-icon{background:linear-gradient(135deg,rgba(255,215,0,0.20),rgba(255,215,0,0.05));} .slide-6 .slide-tag,.slide-6 .slide-slogan{color:rgba(255,215,0,0.90);} .slide-6 .slide-tag-dot{background:rgba(255,215,0,0.90);} .slide-6 .slide-title{color:rgba(255,215,0,0.95);}
+    .slide-art { flex-shrink:0;width:160px;height:160px;position:relative;margin-left:40px;opacity:0.5; }
+    .slide-art-ring { position:absolute;border-radius:50%;border:1px solid currentColor;animation:spin-slow 12s linear infinite; }
+    @keyframes spin-slow { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+    .slideshow-controls { display:flex;align-items:center;justify-content:center;gap:12px;margin-top:24px; }
+    .slide-arrow { width:40px;height:40px;border-radius:50%;background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text-primary);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;backdrop-filter:blur(10px); }
+    .slide-arrow:hover { background:rgba(255,255,255,0.12);transform:scale(1.1);border-color:var(--glass-highlight); }
+    .slide-pause { width:40px;height:40px;border-radius:50%;background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-family:var(--font-mono); }
+    .slide-pause:hover { background:rgba(255,255,255,0.12);color:var(--text-primary);transform:scale(1.1); }
+    .slide-pause.paused { color:var(--accent);border-color:rgba(62,207,255,0.4);background:rgba(62,207,255,0.06); }
+    .slide-dots { display:flex;gap:8px;align-items:center; }
+    .slide-dot { width:6px;height:6px;border-radius:50%;background:var(--text-muted);cursor:pointer;transition:all 0.3s; }
+    .slide-dot.active { background:var(--accent);width:22px;border-radius:3px;box-shadow:0 0 8px var(--accent); }
+    .slide-progress { position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:0 2px 0 0; }
+
+    .about-section { position:relative;z-index:1;padding:100px 40px;max-width:900px;margin:0 auto;text-align:center; }
+    .about-eyebrow { font-family:var(--font-mono);font-size:11px;letter-spacing:0.25em;color:var(--text-muted);text-transform:uppercase;margin-bottom:40px; }
+    .about-card { background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:60px;backdrop-filter:blur(40px);position:relative;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,0.04) inset; }
+    .about-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--glass-highlight),transparent); }
+    .about-quote { font-size:clamp(22px,3vw,36px);font-weight:600;letter-spacing:-0.02em;line-height:1.3;margin-bottom:30px; }
+    .about-quote em { font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+    .about-body { font-size:16px;color:var(--text-secondary);line-height:1.75;font-weight:300;max-width:680px;margin:0 auto 40px; }
+    .about-meta { display:flex;justify-content:center;gap:40px;flex-wrap:wrap; }
+    .about-meta-item { text-align:center; }
+    .about-meta-label { font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px; }
+    .about-meta-value { font-size:14px;color:var(--text-secondary);font-weight:500; }
+    .about-divider { width:1px;height:40px;background:var(--glass-border);align-self:center; }
+    footer { position:relative;z-index:1;padding:30px 40px;text-align:center;border-top:1px solid var(--glass-border);font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:0.1em; }
+
+    @media (max-width:900px) { .quick-grid{grid-template-columns:repeat(3,1fr);} }
+    @media (max-width:768px) { nav{padding:0 20px;} .nav-status{display:none;} .apps-panel{right:16px;width:280px;} .slide{flex-direction:column;padding:40px 28px;text-align:center;align-items:center;} .slide-icon{margin-right:0;margin-bottom:22px;} .slide-art{display:none;} .slides-container{aspect-ratio:auto;min-height:480px;} .hero{padding:100px 24px 40px;} .about-card{padding:36px 24px;} .about-divider{display:none;} .quick-grid{grid-template-columns:repeat(2,1fr);} }
+  </style>
+</head>
+<body>
+  <script>if (localStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'index.html';</script>
+
+  <div class="bg-canvas">
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <nav>
+    <div class="nav-logo">
+      <div class="nav-logo-icon">W</div>
+      <span>Walar</span>
+      <span class="nav-label">Command Center</span>
+    </div>
+    <div class="nav-right">
+      <div class="nav-status"><div class="status-dot"></div><span>Network active</span></div>
+
+      <div class="online-pill" id="onlinePill" onclick="toggleOnlineDropdown()">
+        <div class="online-pill-dot"></div>
+        <span id="onlineCount">0 online</span>
+        <div class="online-dropdown" id="onlineDropdown">
+          <div class="online-dropdown-title">Online now</div>
+          <div id="onlineList"></div>
+        </div>
+      </div>
+
+      <a href="inbox.html" class="mail-nav-btn" id="mailNavBtn" title="Walar Mail">
+        ✉️
+        <div class="mail-unread-badge" id="mailBadge">0</div>
+      </a>
+
+      <div class="apps-trigger" id="appsTrigger" onclick="toggleApps()">
+        <div class="apps-trigger-grid">
+          <div class="apps-trigger-dot"></div><div class="apps-trigger-dot"></div><div class="apps-trigger-dot"></div>
+          <div class="apps-trigger-dot"></div><div class="apps-trigger-dot"></div><div class="apps-trigger-dot"></div>
+          <div class="apps-trigger-dot"></div><div class="apps-trigger-dot"></div><div class="apps-trigger-dot"></div>
+        </div>
+      </div>
+
+      <!-- APPS PANEL — 6 services, no Language -->
+      <div class="apps-panel" id="appsPanel">
+        <div class="apps-panel-title">Walar Services</div>
+        <div class="apps-grid">
+          <a href="https://wcommonwealth.github.io/encrypt/" target="_blank" class="app-item">
+            <div class="app-icon" style="background:linear-gradient(135deg,rgba(62,207,255,0.2),rgba(62,207,255,0.05));">🔐</div>
+            <div class="app-name" style="color:var(--accent);">Encrypt</div>
+          </a>
+          <a href="inbox.html" class="app-item">
+            <div class="app-icon" style="background:linear-gradient(135deg,rgba(167,139,250,0.2),rgba(167,139,250,0.05));">✉️</div>
+            <div class="app-name" style="color:var(--accent2);">Mail</div>
+          </a>
+          <a href="call.html" class="app-item">
+            <div class="app-icon" style="background:linear-gradient(135deg,rgba(52,211,153,0.2),rgba(52,211,153,0.05));">📞</div>
+            <div class="app-name" style="color:var(--accent3);">Voice</div>
+          </a>
+          <div class="app-item soon">
+            <div class="app-icon" style="background:linear-gradient(135deg,rgba(255,170,50,0.2),rgba(255,170,50,0.05));">📈</div>
+            <div class="app-name" style="color:var(--accent4);">Strategy</div>
+            <div class="app-soon-badge">soon</div>
+          </div>
+          <a href="https://walar.xyz/token" target="_blank" class="app-item">
+            <div class="app-icon" style="background:linear-gradient(135deg,rgba(52,211,153,0.2),rgba(52,211,153,0.05));">⬡</div>
+            <div class="app-name" style="color:var(--accent3);">$WLR</div>
+          </a>
+          <a href="wallet.html" class="app-item">
+            <div class="app-icon" style="background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,215,0,0.05));">💰</div>
+            <div class="app-name" style="color:rgba(255,215,0,0.9);">Wallet</div>
+          </a>
+        </div>
+        <div class="apps-panel-footer">Walar Organization · Classified</div>
+      </div>
+
+      <div class="nav-user" id="navUser" onclick="toggleDropdown()">
+        <div class="nav-user-avatar" id="userAvatar">?</div>
+        <span id="navUsername">Member</span>
+        <span style="font-size:10px;opacity:0.4;">▾</span>
+        <div class="nav-dropdown" id="navDropdown">
+          <div class="dropdown-name" id="dropdownName">—</div>
+          <button class="dropdown-btn" onclick="logout()">↩ Sign out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-eyebrow">Secure · Private · Encrypted</div>
+    <h1 class="hero-title">
+      <span class="line-1">Walar</span>
+      <span class="line-2">Command Center</span>
+    </h1>
+    <p class="hero-sub">One interface. Every tool in the Walar ecosystem. Built for those who were trusted with access.</p>
+
+    <!--
+      QUICK GRID (desktop, 6 cols):
+      Row 1: Encrypt | Mail | Voice | Strategy | $WLR | [blank]
+      Row 2: Language | [blank] | [blank] | [blank] | Wallet | [blank]
+    -->
+    <div class="quick-grid">
+
+      <!-- ── ROW 1 ── -->
+      <a href="https://wcommonwealth.github.io/encrypt/" target="_blank" class="quick-card qc-1">
+        <div class="quick-card-icon">🔐</div>
+        <div class="quick-card-name">Encrypt</div>
+        <div class="quick-card-desc">Speak through code</div>
+        <div class="quick-card-badge">Active</div>
+      </a>
+      <a href="inbox.html" class="quick-card qc-2">
+        <div class="quick-card-icon">✉️</div>
+        <div class="quick-card-name">Mail</div>
+        <div class="quick-card-desc">Private by design</div>
+        <div class="quick-card-badge">Active</div>
+      </a>
+      <a href="call.html" class="quick-card" style="border-color:rgba(52,211,153,0.15);" onmouseover="this.style.borderColor='rgba(52,211,153,0.4)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.4),0 0 30px rgba(52,211,153,0.08)'" onmouseout="this.style.borderColor='rgba(52,211,153,0.15)';this.style.boxShadow=''">
+        <div class="quick-card-icon">📞</div>
+        <div class="quick-card-name" style="color:var(--accent3);">Voice</div>
+        <div class="quick-card-desc">P2P encrypted call</div>
+        <div class="quick-card-badge" style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);color:var(--accent3);">Active</div>
+      </a>
+      <div class="quick-card qc-3 soon">
+        <div class="quick-card-icon">📈</div>
+        <div class="quick-card-name">Strategy</div>
+        <div class="quick-card-desc">$WLRS index fund</div>
+        <div class="quick-card-badge">Soon</div>
+      </div>
+      <a href="https://walar.xyz/token" target="_blank" class="quick-card qc-4">
+        <div class="quick-card-icon">⬡</div>
+        <div class="quick-card-name">$WLR Token</div>
+        <div class="quick-card-desc">Transfer value privately</div>
+        <div class="quick-card-badge">Live</div>
+      </a>
+      <div class="quick-card blank"></div><!-- col 6 spacer -->
+
+      <!-- ── ROW 2 ── -->
+      <div class="quick-card qc-5 soon">
+        <div class="quick-card-icon">𝕎</div>
+        <div class="quick-card-name">Language</div>
+        <div class="quick-card-desc">The original code</div>
+        <div class="quick-card-badge">Soon</div>
+      </div>
+      <div class="quick-card blank"></div>
+      <div class="quick-card blank"></div>
+      <div class="quick-card blank"></div>
+      <a href="wallet.html" class="quick-card" style="border-color:rgba(255,215,0,0.15);" onmouseover="this.style.borderColor='rgba(255,215,0,0.4)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.4),0 0 30px rgba(255,215,0,0.08)'" onmouseout="this.style.borderColor='rgba(255,215,0,0.15)';this.style.boxShadow=''">
+        <div class="quick-card-icon">💰</div>
+        <div class="quick-card-name" style="color:rgba(255,215,0,0.9);">Wallet</div>
+        <div class="quick-card-desc">Download Walar Wallet</div>
+        <div class="quick-card-badge" style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.25);color:rgba(255,215,0,0.9);">v0.1.0</div>
+      </a>
+      <div class="quick-card blank"></div><!-- col 6 spacer -->
+
+    </div>
+
+    <!-- SLIDESHOW — 6 slides, 4200ms -->
+    <div class="slideshow-wrapper">
+      <div class="slides-container" id="slidesContainer">
+
+        <!-- Slide 1: Encrypt -->
+        <div class="slide slide-1 active">
+          <div class="slide-icon">🔐</div>
+          <div class="slide-content">
+            <div class="slide-tag"><div class="slide-tag-dot"></div>01 / Walar Encrypt</div>
+            <div class="slide-title">Speak Through Code.</div>
+            <div class="slide-desc">The simplest, fastest, and most secure way to communicate within the Walar network. Your words become unreadable to the outside world — instantly.</div>
+            <div class="slide-slogan">// encrypt · transmit · vanish</div>
+            <a href="https://wcommonwealth.github.io/encrypt/" target="_blank" class="slide-cta slide-cta-primary">Open Encrypt ↗</a>
+          </div>
+          <div class="slide-art">
+            <div class="slide-art-ring" style="inset:0;color:rgba(62,207,255,0.25);animation-duration:14s;"></div>
+            <div class="slide-art-ring" style="inset:20px;color:rgba(62,207,255,0.15);animation-duration:10s;animation-direction:reverse;"></div>
+            <div class="slide-art-ring" style="inset:40px;color:rgba(62,207,255,0.10);animation-duration:7s;"></div>
+          </div>
+        </div>
+
+        <!-- Slide 2: Mail -->
+        <div class="slide slide-2">
+          <div class="slide-icon">✉️</div>
+          <div class="slide-content">
+            <div class="slide-tag"><div class="slide-tag-dot"></div>02 / Walar Email</div>
+            <div class="slide-title">Private by Design.</div>
+            <div class="slide-desc">A digital private mailing service exclusively for members of the Walar Organization. Every message stays within the walls of the network.</div>
+            <div class="slide-slogan">// members only · end-to-end · no trace</div>
+            <a href="inbox.html" class="slide-cta slide-cta-ghost">Access Inbox →</a>
+          </div>
+          <div class="slide-art">
+            <div class="slide-art-ring" style="inset:0;color:rgba(167,139,250,0.25);animation-duration:16s;"></div>
+            <div class="slide-art-ring" style="inset:24px;color:rgba(167,139,250,0.15);animation-duration:11s;animation-direction:reverse;"></div>
+            <div class="slide-art-ring" style="inset:48px;color:rgba(167,139,250,0.10);animation-duration:8s;"></div>
+          </div>
+        </div>
+
+        <!-- Slide 3: Strategy -->
+        <div class="slide slide-3">
+          <div class="slide-icon">📈</div>
+          <div class="slide-content">
+            <div class="slide-tag"><div class="slide-tag-dot"></div>03 / Walar Strategy</div>
+            <div class="slide-title">The Founders' Playbook.</div>
+            <div class="slide-desc">Access the investment knowledge of the founders via Walar Strategy — <strong style="color:rgba(255,170,50,0.95);font-weight:600;">$WLRS</strong>, an index fund focused on Bitcoin and carefully selected cryptocurrencies.</div>
+            <div class="slide-slogan">// index · research · long-term</div>
+            <span class="slide-badge-soon">⏳ Coming Soon</span>
+          </div>
+          <div class="slide-art">
+            <div class="slide-art-ring" style="inset:0;color:rgba(255,170,50,0.25);animation-duration:18s;"></div>
+            <div class="slide-art-ring" style="inset:24px;color:rgba(255,170,50,0.15);animation-duration:12s;animation-direction:reverse;"></div>
+            <div class="slide-art-ring" style="inset:48px;color:rgba(255,170,50,0.10);animation-duration:9s;"></div>
+          </div>
+        </div>
+
+        <!-- Slide 4: $WLR Token — link to walar.xyz/token -->
+        <div class="slide slide-4">
+          <div class="slide-icon">⬡</div>
+          <div class="slide-content">
+            <div class="slide-tag"><div class="slide-tag-dot"></div>04 / Walar Token</div>
+            <div class="slide-title">$WLR — Transfer, Privately.</div>
+            <div class="slide-desc">The quickest, safest, and most private way to move value inside the circle. <strong style="color:var(--accent3);font-weight:600;">$WLR</strong> is a utility token for transferring value between members on the blockchain.</div>
+            <div class="slide-slogan">// private · instant · on-chain</div>
+            <a href="https://walar.xyz/token" target="_blank" class="slide-cta slide-cta-ghost">View $WLR Token ↗</a>
+          </div>
+          <div class="slide-art">
+            <div class="slide-art-ring" style="inset:0;color:rgba(52,211,153,0.25);animation-duration:15s;"></div>
+            <div class="slide-art-ring" style="inset:24px;color:rgba(52,211,153,0.15);animation-duration:10s;animation-direction:reverse;"></div>
+            <div class="slide-art-ring" style="inset:48px;color:rgba(52,211,153,0.10);animation-duration:7s;"></div>
+          </div>
+        </div>
+
+        <!-- Slide 5: Language -->
+        <div class="slide slide-5">
+          <div class="slide-icon">𝕎</div>
+          <div class="slide-content">
+            <div class="slide-tag"><div class="slide-tag-dot"></div>05 / Walar Language</div>
+            <div class="slide-title">The Original Code.</div>
+            <div class="slide-desc">A unique and private writing system — the main legacy of Walar. Developed by the two founders in the 3rd grade (2019). Use it to store precious information no one outside the circle can ever understand.</div>
+            <div class="slide-slogan">// legacy · culture · unbreakable</div>
+            <button class="slide-cta slide-cta-ghost">Documented Walarian →</button>
+          </div>
+          <div class="slide-art">
+            <div class="slide-art-ring" style="inset:0;color:rgba(251,113,133,0.25);animation-duration:13s;"></div>
+            <div class="slide-art-ring" style="inset:24px;color:rgba(251,113,133,0.15);animation-duration:9s;animation-direction:reverse;"></div>
+            <div class="slide-art-ring" style="inset:48px;color:rgba(251,113,133,0.10);animation-duration:6s;"></div>
+          </div>
+        </div>
+
+        <!-- Slide 6: Walar Wallet (NEW) -->
+        <div class="slide slide-6">
+          <div class="slide-icon">💰</div>
+          <div class="slide-content">
+            <div class="slide-tag"><div class="slide-tag-dot"></div>06 / Walar Wallet</div>
+            <div class="slide-title">Your Keys. Your Coins.</div>
+            <div class="slide-desc">A secure, open-source multichain crypto wallet supporting Bitcoin, Ethereum, and Solana. Built for the Walar circle — no custodians, no compromises, full self-sovereignty over your assets.</div>
+            <div class="slide-slogan">// open-source · multichain · self-custody</div>
+            <a href="wallet.html" class="slide-cta slide-cta-ghost">Download Wallet →</a>
+          </div>
+          <div class="slide-art">
+            <div class="slide-art-ring" style="inset:0;color:rgba(255,215,0,0.25);animation-duration:14s;"></div>
+            <div class="slide-art-ring" style="inset:24px;color:rgba(255,215,0,0.15);animation-duration:10s;animation-direction:reverse;"></div>
+            <div class="slide-art-ring" style="inset:48px;color:rgba(255,215,0,0.10);animation-duration:7s;"></div>
+          </div>
+        </div>
+
+        <div class="slide-progress" id="slideProgress" style="width:0%"></div>
+      </div>
+
+      <div class="slideshow-controls">
+        <button class="slide-arrow" onclick="prevSlide()">←</button>
+        <button class="slide-pause" id="pauseBtn" onclick="togglePause()">⏸</button>
+        <div class="slide-dots">
+          <div class="slide-dot active" onclick="goToSlide(0)"></div>
+          <div class="slide-dot" onclick="goToSlide(1)"></div>
+          <div class="slide-dot" onclick="goToSlide(2)"></div>
+          <div class="slide-dot" onclick="goToSlide(3)"></div>
+          <div class="slide-dot" onclick="goToSlide(4)"></div>
+          <div class="slide-dot" onclick="goToSlide(5)"></div>
+        </div>
+        <button class="slide-arrow" onclick="nextSlide()">→</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section">
+    <div class="about-eyebrow">The Organization · Est. 2021 · Transilvania, RO</div>
+    <div class="about-card">
+      <div class="about-quote">A private organization built on <em>privacy</em>, <em>trust</em>, and the silent pursuit of something greater.</div>
+      <div class="about-body">Walar is a private organization that focuses on privacy solutions, experimenting and growing its assets. The core of the union is two anonymous founders who built the ecosystem from the ground up over the years. The organization is located in Transilvania, Romania, and there is nothing else to be known. If you are reading this — the founders trust you and have granted you access to their private network. Do not take that lightly.</div>
+      <div class="about-meta">
+        <div class="about-meta-item"><div class="about-meta-label">Founded</div><div class="about-meta-value">Somewhere around 2021</div></div>
+        <div class="about-divider"></div>
+        <div class="about-meta-item"><div class="about-meta-label">Location</div><div class="about-meta-value">Transilvania, RO</div></div>
+        <div class="about-divider"></div>
+        <div class="about-meta-item"><div class="about-meta-label">Core</div><div class="about-meta-value">2 anonymous founders</div></div>
+        <div class="about-divider"></div>
+        <div class="about-meta-item"><div class="about-meta-label">Access</div><div class="about-meta-value">By trust only</div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span style="font-family:var(--font-mono);letter-spacing:0.1em;">© WALAR ORGANIZATION · CLASSIFIED · TRANSYLVANIA, RO</span>
+  </footer>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    const API = 'https://api.walar.xyz';
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username') || 'Member';
+
+    document.getElementById('navUsername').textContent = username;
+    document.getElementById('dropdownName').textContent = username.toUpperCase();
+    document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+
+    function toggleDropdown() { document.getElementById('navUser').classList.toggle('open'); }
+    function toggleApps() { document.getElementById('appsPanel').classList.toggle('open'); }
+    function toggleOnlineDropdown() { document.getElementById('onlinePill').classList.toggle('open'); }
+
+    document.addEventListener('click', e => {
+      if (!document.getElementById('navUser').contains(e.target)) document.getElementById('navUser').classList.remove('open');
+      if (!document.getElementById('appsTrigger').contains(e.target) && !document.getElementById('appsPanel').contains(e.target)) document.getElementById('appsPanel').classList.remove('open');
+      if (!document.getElementById('onlinePill').contains(e.target)) document.getElementById('onlinePill').classList.remove('open');
+    });
+
+    function logout() {
+      if (socket) socket.disconnect();
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('username');
+      localStorage.removeItem('token');
+      window.location.href = 'index.html';
+    }
+
+    async function checkUnread() {
+      try {
+        const res = await fetch(`${API}/messages/unread`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const badge = document.getElementById('mailBadge');
+        if (data.count > 0) { badge.textContent = data.count > 9 ? '9+' : data.count; badge.classList.add('visible'); }
+        else { badge.classList.remove('visible'); }
+      } catch {}
+    }
+
+    let socket = null;
+    if (token) {
+      socket = io(API, { auth: { token }, transports: ['polling'] });
+      socket.on('online_users', (users) => {
+        document.getElementById('onlineCount').textContent = `${users.length} online`;
+        document.getElementById('onlineList').innerHTML = users.map(u => `<div class="online-member"><div class="online-member-dot"></div><span>${u}</span></div>`).join('');
+      });
+      socket.on('new_message', () => {
+        const badge = document.getElementById('mailBadge');
+        const n = (parseInt(badge.textContent) || 0) + 1;
+        badge.textContent = n > 9 ? '9+' : n;
+        badge.classList.add('visible');
+        const btn = document.getElementById('mailNavBtn');
+        btn.style.borderColor = 'rgba(167,139,250,0.8)';
+        btn.style.boxShadow = '0 0 16px rgba(167,139,250,0.4)';
+        setTimeout(() => { btn.style.borderColor = ''; btn.style.boxShadow = ''; }, 2000);
+      });
+    }
+    checkUnread();
+    setInterval(checkUnread, 30000);
+
+    // ── SLIDESHOW — 6 slides, 4200ms ──
+    const SLIDE_DURATION = 4200;
+    const TOTAL = 6;
+    let current = 0, paused = false, timer = null, raf = null, t0 = null, elapsed = 0;
+    const slides = document.querySelectorAll('.slide');
+    const dots   = document.querySelectorAll('.slide-dot');
+    const bar    = document.getElementById('slideProgress');
+    const pauseBtn = document.getElementById('pauseBtn');
+
+    function goToSlide(i) {
+      const prev = current;
+      current = ((i % TOTAL) + TOTAL) % TOTAL;
+      if (prev === current) return;
+      slides[prev].classList.remove('active');
+      slides[prev].classList.add('exit-left');
+      setTimeout(() => slides[prev].classList.remove('exit-left'), 700);
+      slides[current].classList.add('active');
+      dots.forEach((d, j) => d.classList.toggle('active', j === current));
+      elapsed = 0;
+      if (!paused) startTimer();
+    }
+    function nextSlide() { goToSlide(current + 1); }
+    function prevSlide() { goToSlide(current - 1); }
+
+    function startProgress() {
+      if (raf) cancelAnimationFrame(raf);
+      t0 = Date.now();
+      (function tick() {
+        const pct = Math.min(((elapsed + Date.now() - t0) / SLIDE_DURATION) * 100, 100);
+        bar.style.width = pct + '%';
+        if (pct < 100 && !paused) raf = requestAnimationFrame(tick);
+      })();
+    }
+    function startTimer() {
+      clearTimeout(timer);
+      startProgress();
+      timer = setTimeout(() => { elapsed = 0; nextSlide(); }, SLIDE_DURATION - elapsed);
+    }
+    function togglePause() {
+      paused = !paused;
+      pauseBtn.textContent = paused ? '▶' : '⏸';
+      pauseBtn.classList.toggle('paused', paused);
+      if (paused) { clearTimeout(timer); if (raf) cancelAnimationFrame(raf); elapsed += Date.now() - t0; }
+      else startTimer();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft')  prevSlide();
+      if (e.key === ' ') { e.preventDefault(); togglePause(); }
+    });
+    let tx = 0;
+    const sc = document.getElementById('slidesContainer');
+    sc.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive:true });
+    sc.addEventListener('touchend',   e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) dx < 0 ? nextSlide() : prevSlide(); });
+
+    startTimer();
+  </script>
+</body>
+</html>
