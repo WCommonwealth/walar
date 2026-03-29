@@ -102,10 +102,8 @@
 
     /*
       QUICK GRID — desktop 6 cols:
-      Row 1: Encrypt | Mail | Voice | Strategy | $WLR | [blank]
-      Row 2: Language | [blank] | [blank] | [blank] | Wallet | [blank]
-    */
-    .quick-grid { display:grid;grid-template-columns:repeat(6,1fr);gap:12px;width:100%;max-width:1100px;margin-bottom:40px;opacity:0;animation:fadeUp 1s ease forwards 0.55s; }
+*/
+    .quick-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;max-width:1100px;margin-bottom:40px;opacity:0;animation:fadeUp 1s ease forwards 0.55s; }
     .quick-card { background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:20px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;backdrop-filter:blur(20px); }
     .quick-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--glass-highlight),transparent); }
     .quick-card:hover { transform:translateY(-3px);box-shadow:0 20px 40px rgba(0,0,0,0.4); }
@@ -224,7 +222,7 @@
       <div class="apps-panel" id="appsPanel">
         <div class="apps-panel-title">Walar Services</div>
         <div class="apps-grid">
-          <a href="https://wcommonwealth.github.io/encrypt/" target="_blank" class="app-item">
+          <a href="https://walar.xyz/encrypt.html" target="_blank" class="app-item">
             <div class="app-icon" style="background:linear-gradient(135deg,rgba(62,207,255,0.2),rgba(62,207,255,0.05));">🔐</div>
             <div class="app-name" style="color:var(--accent);">Encrypt</div>
           </a>
@@ -273,15 +271,11 @@
     </h1>
     <p class="hero-sub">One interface. Every tool in the Walar ecosystem. Built for those who were trusted with access.</p>
 
-    <!--
-      QUICK GRID (desktop, 6 cols):
-      Row 1: Encrypt | Mail | Voice | Strategy | $WLR | [blank]
-      Row 2: Language | [blank] | [blank] | [blank] | Wallet | [blank]
-    -->
+    <!-- QUICK GRID — 5 cols. Row 1: Encrypt|Mail|Voice|Strategy|$WLR  Row 2: Language|blank|blank|blank|Wallet -->
     <div class="quick-grid">
 
       <!-- ── ROW 1 ── -->
-      <a href="https://wcommonwealth.github.io/encrypt/" target="_blank" class="quick-card qc-1">
+      <a href="https://walar.xyz/encrypt.html" target="_blank" class="quick-card qc-1">
         <div class="quick-card-icon">🔐</div>
         <div class="quick-card-name">Encrypt</div>
         <div class="quick-card-desc">Speak through code</div>
@@ -311,8 +305,6 @@
         <div class="quick-card-desc">Transfer value privately</div>
         <div class="quick-card-badge">Live</div>
       </a>
-      <div class="quick-card blank"></div><!-- col 6 spacer -->
-
       <!-- ── ROW 2 ── -->
       <div class="quick-card qc-5 soon">
         <div class="quick-card-icon">𝕎</div>
@@ -329,7 +321,6 @@
         <div class="quick-card-desc">Download Walar Wallet</div>
         <div class="quick-card-badge" style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.25);color:rgba(255,215,0,0.9);">v0.1.0</div>
       </a>
-      <div class="quick-card blank"></div><!-- col 6 spacer -->
 
     </div>
 
@@ -345,7 +336,7 @@
             <div class="slide-title">Speak Through Code.</div>
             <div class="slide-desc">The simplest, fastest, and most secure way to communicate within the Walar network. Your words become unreadable to the outside world — instantly.</div>
             <div class="slide-slogan">// encrypt · transmit · vanish</div>
-            <a href="https://wcommonwealth.github.io/encrypt/" target="_blank" class="slide-cta slide-cta-primary">Open Encrypt ↗</a>
+            <a href="https://walar.xyz/encrypt.html" target="_blank" class="slide-cta slide-cta-primary">Open Encrypt ↗</a>
           </div>
           <div class="slide-art">
             <div class="slide-art-ring" style="inset:0;color:rgba(62,207,255,0.25);animation-duration:14s;"></div>
