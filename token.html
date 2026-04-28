@@ -484,6 +484,7 @@
   <div class="toast" id="toast">Copied ✓</div>
 
   <script>
+    if (localStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'index.html'; //auth
   // ── CURSOR ──
   const cursor = document.getElementById('cursor');
   const ring   = document.getElementById('cursor-ring');
