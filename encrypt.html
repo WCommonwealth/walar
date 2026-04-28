@@ -338,6 +338,7 @@
   <div class="copy-toast" id="copyToast">Copied to clipboard</div>
 
   <script>
+    if (localStorage.getItem('isLoggedIn') !== 'true') window.location.href = 'index.html'; //auth
   // ════════════════════════════════════════════════════
   //  WALAR CIPHER — Custom key-based encryption
   //  Algorithm: multi-layer substitution + positional
