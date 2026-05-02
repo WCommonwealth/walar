@@ -35,7 +35,6 @@
 
     .main { position:relative; z-index:1; flex:1; display:flex; align-items:center; justify-content:center; padding:40px 24px; }
 
-    /* IDLE STATE */
     .voice-card {
       background:var(--glass-bg); border:1px solid var(--glass-border);
       border-radius:28px; padding:48px 40px;
@@ -80,7 +79,6 @@
     .status-msg.error { color:rgba(255,100,100,0.8); }
     .status-msg.success { color:var(--accent3); }
 
-    /* INCOMING CALL OVERLAY */
     .incoming-overlay {
       display:none; position:fixed; inset:0; z-index:500;
       background:rgba(5,8,16,0.92); backdrop-filter:blur(20px);
@@ -112,7 +110,6 @@
     .btn-reject { flex:1; padding:14px; border-radius:12px; border:none; background:rgba(255,60,60,0.12); border:1px solid rgba(255,60,60,0.3); color:rgba(255,100,100,0.9); font-size:14px; font-weight:700; font-family:var(--font-main); cursor:pointer; transition:all 0.2s; }
     .btn-reject:hover { background:rgba(255,60,60,0.2); }
 
-    /* ACTIVE CALL UI */
     .call-ui { display:none; flex-direction:column; align-items:center; gap:32px; }
     .call-ui.show { display:flex; }
     .call-avatar {
@@ -141,7 +138,6 @@
     .ctrl-hangup { width:68px; height:68px; background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-size:22px; }
     .ctrl-hangup:hover { transform:scale(1.08); box-shadow:0 8px 24px rgba(239,68,68,0.4); }
 
-    /* IDLE CARD hidden when call active */
     .voice-card.hidden { display:none; }
   </style>
 </head>
@@ -161,7 +157,6 @@
     </div>
   </nav>
 
-  <!-- INCOMING CALL OVERLAY -->
   <div class="incoming-overlay" id="incomingOverlay">
     <div class="incoming-card">
       <div class="incoming-avatar" id="incomingAvatar">?</div>
@@ -175,7 +170,6 @@
   </div>
 
   <div class="main">
-    <!-- IDLE -->
     <div class="voice-card" id="idleCard">
       <div class="voice-title">Walar Voice</div>
       <div class="voice-subtitle">Encrypted · Peer to Peer · Private</div>
@@ -189,7 +183,6 @@
       <div class="status-msg" id="statusMsg"></div>
     </div>
 
-    <!-- ACTIVE CALL -->
     <div class="call-ui" id="callUi">
       <div class="call-avatar" id="callAvatar">?</div>
       <div class="call-with" id="callWith">—</div>
@@ -205,7 +198,7 @@
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
-    const API = 'https://api.walar.xyz';
+    const APIS = ['https://api.walar.xyz', 'https://api2.walar.xyz'];
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username') || 'Member';
     document.getElementById('nav-username').textContent = username.toUpperCase();
@@ -217,60 +210,70 @@
     let callSeconds = 0;
     let incomingOffer = null;
     let incomingFrom = null;
+    let activeAPI = APIS[0];
 
     const iceServers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-    // ── LOAD ONLINE USERS ──
-    socket = io(API, { auth: { token }, transports: ['polling'] });
+    // Probe which API is alive, then connect socket
+    async function initSocket() {
+      for (const base of APIS) {
+        try {
+          const probe = await fetch(`${base}/health`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
+          if (probe && probe.status < 500) { activeAPI = base; break; }
+        } catch {}
+      }
 
-    socket.on('online_users', (users) => {
-      const sel = document.getElementById('userSelect');
-      sel.innerHTML = '<option value="">— select member —</option>';
-      users.filter(u => u !== username).forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u; opt.textContent = u;
-        sel.appendChild(opt);
+      socket = io(activeAPI, { auth: { token }, transports: ['polling'] });
+
+      socket.on('online_users', (users) => {
+        const sel = document.getElementById('userSelect');
+        sel.innerHTML = '<option value="">— select member —</option>';
+        users.filter(u => u !== username).forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u; opt.textContent = u;
+          sel.appendChild(opt);
+        });
       });
-    });
 
-    // ── INCOMING CALL ──
-    socket.on('incoming_call', async ({ from, offer }) => {
-      incomingFrom = from;
-      incomingOffer = offer;
-      document.getElementById('incomingAvatar').textContent = from.charAt(0).toUpperCase();
-      document.getElementById('incomingName').textContent = from;
-      document.getElementById('incomingOverlay').classList.add('show');
-    });
+      socket.on('incoming_call', async ({ from, offer }) => {
+        incomingFrom = from;
+        incomingOffer = offer;
+        document.getElementById('incomingAvatar').textContent = from.charAt(0).toUpperCase();
+        document.getElementById('incomingName').textContent = from;
+        document.getElementById('incomingOverlay').classList.add('show');
+      });
 
-    socket.on('call_accepted', async ({ answer }) => {
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-      setStatus('Connected ✓', 'success');
-      showCallUI(callTarget);
-    });
+      socket.on('call_accepted', async ({ answer }) => {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        setStatus('Connected ✓', 'success');
+        showCallUI(callTarget);
+      });
 
-    socket.on('call_rejected', () => {
-      setStatus('Call declined.', 'error');
-      cleanup();
-    });
+      socket.on('call_rejected', () => {
+        setStatus('Call declined.', 'error');
+        cleanup();
+      });
 
-    socket.on('call_failed', ({ reason }) => {
-      setStatus(reason, 'error');
-      cleanup();
-    });
+      socket.on('call_failed', ({ reason }) => {
+        setStatus(reason, 'error');
+        cleanup();
+      });
 
-    socket.on('ice_candidate', async ({ candidate }) => {
-      try {
-        if (peerConnection && candidate) await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-      } catch {}
-    });
+      socket.on('ice_candidate', async ({ candidate }) => {
+        try {
+          if (peerConnection && candidate) await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch {}
+      });
 
-    socket.on('hang_up', () => {
-      setStatus('Call ended.', '');
-      cleanup();
-      hideCallUI();
-    });
+      socket.on('hang_up', () => {
+        setStatus('Call ended.', '');
+        cleanup();
+        hideCallUI();
+      });
+    }
 
-    // ── START CALL ──
+    initSocket();
+
     async function startCall() {
       const target = document.getElementById('userSelect').value;
       if (!target) { setStatus('Select a member to call.', 'error'); return; }
@@ -302,7 +305,6 @@
       socket.emit('call_user', { to: callTarget, offer });
     }
 
-    // ── ACCEPT CALL ──
     async function acceptCall() {
       document.getElementById('incomingOverlay').classList.remove('show');
       callTarget = incomingFrom;
@@ -333,7 +335,6 @@
       showCallUI(callTarget);
     }
 
-    // ── REJECT CALL ──
     function rejectCall() {
       document.getElementById('incomingOverlay').classList.remove('show');
       socket.emit('call_rejected', { to: incomingFrom });
@@ -341,7 +342,6 @@
       incomingOffer = null;
     }
 
-    // ── HANG UP ──
     function hangUp() {
       socket.emit('hang_up', { to: callTarget });
       cleanup();
@@ -349,7 +349,6 @@
       setStatus('Call ended.', '');
     }
 
-    // ── MUTE ──
     function toggleMute() {
       isMuted = !isMuted;
       if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
@@ -358,7 +357,6 @@
       btn.classList.toggle('muted', isMuted);
     }
 
-    // ── UTILS ──
     function showCallUI(target) {
       document.getElementById('idleCard').classList.add('hidden');
       document.getElementById('callUi').classList.add('show');
