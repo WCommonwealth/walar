@@ -335,8 +335,26 @@
   </div>
 
   <script>
-    const API = 'https://api2.walar.xyz';
+    const APIS = ['https://api.walar.xyz', 'https://api2.walar.xyz'];
     let isRegisterMode = false;
+
+    async function fetchWithFallback(path, options) {
+      let lastError = null;
+      for (const base of APIS) {
+        try {
+          const res = await fetch(`${base}${path}`, {
+            ...options,
+            signal: AbortSignal.timeout(5000)
+          });
+          // Got a real HTTP response (even 4xx) — server is up
+          if (res.status < 500) return res;
+        } catch (err) {
+          // Network error or timeout — try next server
+          lastError = err;
+        }
+      }
+      throw lastError || new Error('All servers unreachable.');
+    }
 
     function toggleMode() {
       isRegisterMode = !isRegisterMode;
@@ -384,7 +402,7 @@
       }
 
       try {
-        const res = await fetch(`${API}/login`, {
+        const res = await fetchWithFallback('/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -427,7 +445,7 @@
       }
 
       try {
-        const res = await fetch(`${API}/register`, {
+        const res = await fetchWithFallback('/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password, email })
