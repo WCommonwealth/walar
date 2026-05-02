@@ -69,7 +69,6 @@
     @keyframes panelIn { from{opacity:0;transform:translateY(-8px) scale(0.97);} to{opacity:1;transform:translateY(0) scale(1);} }
     .apps-panel::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--glass-highlight),transparent);border-radius:20px 20px 0 0; }
     .apps-panel-title { font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--glass-border); }
-    /* 6 services, 3x2 grid — no Language */
     .apps-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px; }
     .app-item { display:flex;flex-direction:column;align-items:center;padding:14px 8px;border-radius:14px;border:1px solid transparent;cursor:pointer;transition:all 0.2s;text-decoration:none;gap:8px;position:relative; }
     .app-item:hover { background:var(--glass-bg);border-color:var(--glass-border); }
@@ -100,9 +99,6 @@
     .hero-sub { font-size:18px;color:var(--text-secondary);font-weight:300;max-width:500px;line-height:1.6;margin-bottom:48px;opacity:0;animation:fadeUp 0.9s ease forwards 0.5s; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
 
-    /*
-      QUICK GRID — desktop 6 cols:
-*/
     .quick-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;max-width:1100px;margin-bottom:40px;opacity:0;animation:fadeUp 1s ease forwards 0.55s; }
     .quick-card { background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:20px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;backdrop-filter:blur(20px); }
     .quick-card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--glass-highlight),transparent); }
@@ -218,7 +214,6 @@
         </div>
       </div>
 
-      <!-- APPS PANEL — 6 services, no Language -->
       <div class="apps-panel" id="appsPanel">
         <div class="apps-panel-title">Walar Services</div>
         <div class="apps-grid">
@@ -271,10 +266,7 @@
     </h1>
     <p class="hero-sub">One interface. Every tool in the Walar ecosystem. Built for those who were trusted with access.</p>
 
-    <!-- QUICK GRID — 5 cols. Row 1: Encrypt|Mail|Voice|Strategy|$WLR  Row 2: Language|blank|blank|blank|Wallet -->
     <div class="quick-grid">
-
-      <!-- ── ROW 1 ── -->
       <a href="https://walar.xyz/encrypt.html" target="_blank" class="quick-card qc-1">
         <div class="quick-card-icon">🔐</div>
         <div class="quick-card-name">Encrypt</div>
@@ -305,7 +297,6 @@
         <div class="quick-card-desc">Transfer value privately</div>
         <div class="quick-card-badge">Live</div>
       </a>
-      <!-- ── ROW 2 ── -->
       <div class="quick-card qc-5 soon">
         <div class="quick-card-icon">𝕎</div>
         <div class="quick-card-name">Language</div>
@@ -321,14 +312,10 @@
         <div class="quick-card-desc">Download Walar Wallet</div>
         <div class="quick-card-badge" style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.25);color:rgba(255,215,0,0.9);">v0.1.0</div>
       </a>
-
     </div>
 
-    <!-- SLIDESHOW — 6 slides, 4200ms -->
     <div class="slideshow-wrapper">
       <div class="slides-container" id="slidesContainer">
-
-        <!-- Slide 1: Encrypt -->
         <div class="slide slide-1 active">
           <div class="slide-icon">🔐</div>
           <div class="slide-content">
@@ -344,8 +331,6 @@
             <div class="slide-art-ring" style="inset:40px;color:rgba(62,207,255,0.10);animation-duration:7s;"></div>
           </div>
         </div>
-
-        <!-- Slide 2: Mail -->
         <div class="slide slide-2">
           <div class="slide-icon">✉️</div>
           <div class="slide-content">
@@ -361,8 +346,6 @@
             <div class="slide-art-ring" style="inset:48px;color:rgba(167,139,250,0.10);animation-duration:8s;"></div>
           </div>
         </div>
-
-        <!-- Slide 3: Strategy -->
         <div class="slide slide-3">
           <div class="slide-icon">📈</div>
           <div class="slide-content">
@@ -378,8 +361,6 @@
             <div class="slide-art-ring" style="inset:48px;color:rgba(255,170,50,0.10);animation-duration:9s;"></div>
           </div>
         </div>
-
-        <!-- Slide 4: $WLR Token — link to walar.xyz/token -->
         <div class="slide slide-4">
           <div class="slide-icon">⬡</div>
           <div class="slide-content">
@@ -395,8 +376,6 @@
             <div class="slide-art-ring" style="inset:48px;color:rgba(52,211,153,0.10);animation-duration:7s;"></div>
           </div>
         </div>
-
-        <!-- Slide 5: Language -->
         <div class="slide slide-5">
           <div class="slide-icon">𝕎</div>
           <div class="slide-content">
@@ -412,8 +391,6 @@
             <div class="slide-art-ring" style="inset:48px;color:rgba(251,113,133,0.10);animation-duration:6s;"></div>
           </div>
         </div>
-
-        <!-- Slide 6: Walar Wallet (NEW) -->
         <div class="slide slide-6">
           <div class="slide-icon">💰</div>
           <div class="slide-content">
@@ -429,10 +406,8 @@
             <div class="slide-art-ring" style="inset:48px;color:rgba(255,215,0,0.10);animation-duration:7s;"></div>
           </div>
         </div>
-
         <div class="slide-progress" id="slideProgress" style="width:0%"></div>
       </div>
-
       <div class="slideshow-controls">
         <button class="slide-arrow" onclick="prevSlide()">←</button>
         <button class="slide-pause" id="pauseBtn" onclick="togglePause()">⏸</button>
@@ -472,9 +447,24 @@
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script>
-    const API = 'https://api2.walar.xyz';
+    const APIS = ['https://api.walar.xyz', 'https://api2.walar.xyz'];
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username') || 'Member';
+
+    // Pick the working API base for socket.io and fetch
+    let activeAPI = APIS[0];
+    async function fetchWithFallback(path, options = {}) {
+      for (const base of APIS) {
+        try {
+          const res = await fetch(`${base}${path}`, {
+            ...options,
+            signal: AbortSignal.timeout(5000)
+          });
+          if (res.status < 500) { activeAPI = base; return res; }
+        } catch { /* try next */ }
+      }
+      throw new Error('All servers unreachable.');
+    }
 
     document.getElementById('navUsername').textContent = username;
     document.getElementById('dropdownName').textContent = username.toUpperCase();
@@ -500,7 +490,9 @@
 
     async function checkUnread() {
       try {
-        const res = await fetch(`${API}/messages/unread`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const res = await fetchWithFallback('/messages/unread', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await res.json();
         const badge = document.getElementById('mailBadge');
         if (data.count > 0) { badge.textContent = data.count > 9 ? '9+' : data.count; badge.classList.add('visible'); }
@@ -508,28 +500,42 @@
       } catch {}
     }
 
+    // Connect socket to the first available API
     let socket = null;
-    if (token) {
-      socket = io(API, { auth: { token }, transports: ['polling'] });
-      socket.on('online_users', (users) => {
-        document.getElementById('onlineCount').textContent = `${users.length} online`;
-        document.getElementById('onlineList').innerHTML = users.map(u => `<div class="online-member"><div class="online-member-dot"></div><span>${u}</span></div>`).join('');
-      });
-      socket.on('new_message', () => {
-        const badge = document.getElementById('mailBadge');
-        const n = (parseInt(badge.textContent) || 0) + 1;
-        badge.textContent = n > 9 ? '9+' : n;
-        badge.classList.add('visible');
-        const btn = document.getElementById('mailNavBtn');
-        btn.style.borderColor = 'rgba(167,139,250,0.8)';
-        btn.style.boxShadow = '0 0 16px rgba(167,139,250,0.4)';
-        setTimeout(() => { btn.style.borderColor = ''; btn.style.boxShadow = ''; }, 2000);
-      });
+    async function initSocket() {
+      // Probe which server is alive first
+      for (const base of APIS) {
+        try {
+          const probe = await fetch(`${base}/health`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
+          if (probe && probe.status < 500) { activeAPI = base; break; }
+        } catch {}
+      }
+      if (token) {
+        socket = io(activeAPI, { auth: { token }, transports: ['polling'] });
+        socket.on('online_users', (users) => {
+          document.getElementById('onlineCount').textContent = `${users.length} online`;
+          document.getElementById('onlineList').innerHTML = users.map(u =>
+            `<div class="online-member"><div class="online-member-dot"></div><span>${u}</span></div>`
+          ).join('');
+        });
+        socket.on('new_message', () => {
+          const badge = document.getElementById('mailBadge');
+          const n = (parseInt(badge.textContent) || 0) + 1;
+          badge.textContent = n > 9 ? '9+' : n;
+          badge.classList.add('visible');
+          const btn = document.getElementById('mailNavBtn');
+          btn.style.borderColor = 'rgba(167,139,250,0.8)';
+          btn.style.boxShadow = '0 0 16px rgba(167,139,250,0.4)';
+          setTimeout(() => { btn.style.borderColor = ''; btn.style.boxShadow = ''; }, 2000);
+        });
+      }
     }
+
+    initSocket();
     checkUnread();
     setInterval(checkUnread, 30000);
 
-    // ── SLIDESHOW — 6 slides, 4200ms ──
+    // ── SLIDESHOW ──
     const SLIDE_DURATION = 4200;
     const TOTAL = 6;
     let current = 0, paused = false, timer = null, raf = null, t0 = null, elapsed = 0;
