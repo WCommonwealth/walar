@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>W Commonwealth Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --glass-bg: rgba(255,255,255,0.07);
@@ -36,6 +35,67 @@
       overflow: hidden;
     }
 
+    /* Background */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-canvas::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(62,207,255,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(167,139,250,0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(52,211,153,0.05) 0%, transparent 70%);
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: drift 20s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(62,207,255,0.15), transparent);
+      top: -100px; left: -100px;
+    }
+
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(167,139,250,0.12), transparent);
+      bottom: -80px; right: -80px;
+      animation-delay: -7s;
+    }
+
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(52,211,153,0.1), transparent);
+      top: 50%; left: 60%;
+      animation-delay: -14s;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      33% { transform: translate(40px,-30px) scale(1.05); }
+      66% { transform: translate(-20px,40px) scale(0.95); }
+    }
+
+    /* Card */
     .login-card {
       position: relative;
       z-index: 1;
@@ -45,7 +105,87 @@
       border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg);
       padding: 48px 40px;
-      backdrop-filter: blur(40px);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.05) inset,
+        0 40px 120px rgba(0,0,0,0.6),
+        0 0 60px rgba(62,207,255,0.04);
+      animation: fadeUp 0.7s ease forwards;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo */
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      justify-content: center;
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: #000;
+    }
+
+    .logo-text {
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+    }
+
+    /* Title */
+    .form-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .form-subtitle {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    /* Inputs */
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+      display: block;
     }
 
     .input-field {
@@ -54,9 +194,24 @@
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--glass-border);
       border-radius: 12px;
-      color: white;
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     }
 
+    .input-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    .input-field:focus {
+      border-color: rgba(62,207,255,0.4);
+      background: rgba(62,207,255,0.04);
+      box-shadow: 0 0 0 3px rgba(62,207,255,0.08);
+    }
+
+    /* Button */
     .btn-primary {
       width: 100%;
       padding: 14px;
@@ -64,123 +219,236 @@
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border: none;
       border-radius: 12px;
-      cursor: pointer;
+      color: #000;
+      font-family: var(--font-main);
+      font-size: 14px;
       font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 30px rgba(62,207,255,0.3);
+    }
+
+    .btn-primary:active { transform: scale(0.98); }
+
+    /* Switch link */
+    .switch-row {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .switch-row a {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    .switch-row a:hover { opacity: 0.7; }
+
+    /* Messages */
+    .msg {
+      margin-top: 14px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.03em;
+      display: none;
+    }
+
+    .msg-error {
+      background: rgba(255,60,60,0.08);
+      border: 1px solid rgba(255,60,60,0.2);
+      color: rgba(255,100,100,0.9);
+    }
+
+    .msg-success {
+      background: rgba(52,211,153,0.08);
+      border: 1px solid rgba(52,211,153,0.2);
+      color: var(--accent3);
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--glass-border);
+      margin: 24px 0;
     }
   </style>
 </head>
-
 <body>
 
-<div class="login-card">
-  <h2>Walar Login</h2>
+  <div class="bg-canvas">
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
 
-  <input class="input-field" id="username" placeholder="username">
-  <input class="input-field" id="password" type="password" placeholder="password">
+  <div class="login-card">
+    <div class="logo-row">
+      <div class="logo-icon">W</div>
+      <span class="logo-text">Walar</span>
+    </div>
 
-  <button class="btn-primary" onclick="login()">Sign In</button>
+    <div class="form-title" id="form-title">Welcome back</div>
+    <div class="form-subtitle" id="form-subtitle">Restricted access · Members only</div>
 
-  <p id="error" style="color:red; display:none;"></p>
-</div>
+    <div class="input-group" id="email-group" style="display:none;">
+      <label class="input-label">Email</label>
+      <input class="input-field" type="email" id="email" placeholder="you@example.com">
+    </div>
 
-<script>
-/* ===================== FAILOVER SYSTEM ===================== */
+    <div class="input-group">
+      <label class="input-label">Username</label>
+      <input class="input-field" type="text" id="username" placeholder="your_username">
+    </div>
 
-const API_PRIMARY = 'https://api.walar.xyz';
-const API_SECONDARY = 'https://api2.walar.xyz';
+    <div class="input-group">
+      <label class="input-label">Password</label>
+      <input class="input-field" type="password" id="password" placeholder="••••••••">
+    </div>
 
-let API = API_PRIMARY;
+    <div class="input-group" id="confirm-group" style="display:none;">
+      <label class="input-label">Confirm Password</label>
+      <input class="input-field" type="password" id="confirm-password" placeholder="••••••••">
+    </div>
 
-// test server health
-async function ping(url) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 2500);
+    <button class="btn-primary" id="main-btn" onclick="handleSubmit()">Sign In</button>
 
-  try {
-    const start = Date.now();
-    await fetch(url + '/health', { signal: controller.signal });
-    clearTimeout(timeout);
-    return { ok: true, ms: Date.now() - start };
-  } catch {
-    clearTimeout(timeout);
-    return { ok: false, ms: Infinity };
-  }
-}
+    <div class="switch-row">
+      <span id="switch-text">No account?</span>
+      <a onclick="toggleMode()"> <span id="switch-action">Register</span></a>
+    </div>
 
-// choose best API at load
-async function selectAPI() {
-  const [p, s] = await Promise.all([
-    ping(API_PRIMARY),
-    ping(API_SECONDARY)
-  ]);
+    <div class="msg msg-error" id="error"></div>
+    <div class="msg msg-success" id="success"></div>
+  </div>
 
-  if (p.ok && p.ms <= s.ms) {
-    API = API_PRIMARY;
-  } else if (s.ok) {
-    API = API_SECONDARY;
-  } else {
-    API = API_PRIMARY; // fallback default
-  }
+  <script>
+    const API = 'https://api.walar.xyz';
+    let isRegisterMode = false;
 
-  console.log("API selected:", API);
-}
+    function toggleMode() {
+      isRegisterMode = !isRegisterMode;
 
-// safe fetch with fallback
-async function apiFetch(path, options = {}) {
-  try {
-    return await fetch(API + path, options);
-  } catch (e) {
-    const fallback = API === API_PRIMARY ? API_SECONDARY : API_PRIMARY;
-    return await fetch(fallback + path, options);
-  }
-}
+      document.getElementById('error').style.display = 'none';
+      document.getElementById('success').style.display = 'none';
 
-/* ===================== AUTH ===================== */
+      const emailGroup = document.getElementById('email-group');
+      const confirmGroup = document.getElementById('confirm-group');
 
-async function login() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
-  const error = document.getElementById('error');
-
-  error.style.display = 'none';
-
-  if (!username || !password) {
-    error.textContent = "Missing fields";
-    error.style.display = 'block';
-    return;
-  }
-
-  try {
-    const res = await apiFetch('/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('username', data.username);
-      localStorage.setItem('isLoggedIn', 'true');
-      window.location.href = 'main.html';
-    } else {
-      error.textContent = data.error || "Login failed";
-      error.style.display = 'block';
+      if (isRegisterMode) {
+        document.getElementById('form-title').textContent = 'Create account';
+        document.getElementById('form-subtitle').textContent = 'Join the Walar network';
+        document.getElementById('main-btn').textContent = 'Register';
+        document.getElementById('switch-text').textContent = 'Have an account?';
+        document.getElementById('switch-action').textContent = 'Sign in';
+        emailGroup.style.display = 'block';
+        confirmGroup.style.display = 'block';
+      } else {
+        document.getElementById('form-title').textContent = 'Welcome back';
+        document.getElementById('form-subtitle').textContent = 'Restricted access · Members only';
+        document.getElementById('main-btn').textContent = 'Sign In';
+        document.getElementById('switch-text').textContent = 'No account?';
+        document.getElementById('switch-action').textContent = 'Register';
+        emailGroup.style.display = 'none';
+        confirmGroup.style.display = 'none';
+      }
     }
 
-  } catch {
-    error.textContent = "Server unavailable";
-    error.style.display = 'block';
-  }
-}
+    async function handleSubmit() {
+      if (isRegisterMode) await register();
+      else await login();
+    }
 
-/* ===================== INIT ===================== */
+    async function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const error = document.getElementById('error');
+      error.style.display = 'none';
 
-(async function init() {
-  await selectAPI();
-})();
-</script>
+      if (!username || !password) {
+        error.textContent = 'Please enter both username and password.';
+        error.style.display = 'block';
+        return;
+      }
 
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('username', data.username);
+          localStorage.setItem('token', data.token);
+          window.location.href = 'main.html';
+        } else {
+          error.textContent = data.error;
+          error.style.display = 'block';
+        }
+      } catch {
+        error.textContent = 'Cannot connect to server.';
+        error.style.display = 'block';
+      }
+    }
+
+    async function register() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const email = document.getElementById('email').value.trim();
+      const confirm = document.getElementById('confirm-password').value;
+      const error = document.getElementById('error');
+      const success = document.getElementById('success');
+      error.style.display = 'none';
+      success.style.display = 'none';
+
+      if (!username || !password || !email || !confirm) {
+        error.textContent = 'Please fill in all fields.';
+        error.style.display = 'block';
+        return;
+      }
+      if (password !== confirm) {
+        error.textContent = 'Passwords do not match.';
+        error.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          success.textContent = 'Account created! You can now sign in.';
+          success.style.display = 'block';
+          setTimeout(() => toggleMode(), 1500);
+        } else {
+          error.textContent = data.error;
+          error.style.display = 'block';
+        }
+      } catch {
+        error.textContent = 'Cannot connect to server.';
+        error.style.display = 'block';
+      }
+    }
+
+    document.getElementById('password').addEventListener('keypress', e => { if (e.key === 'Enter') handleSubmit(); });
+    document.getElementById('confirm-password').addEventListener('keypress', e => { if (e.key === 'Enter') handleSubmit(); });
+  </script>
 </body>
 </html>
